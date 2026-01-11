@@ -47,10 +47,24 @@ func CommandEnter(d *storage.Database) error {
 				continue
 			}
 
-			value := d.Get(sliceCommand[1])
+			value, err := d.Get(sliceCommand[1])
+
+			if err != nil {
+				fmt.Println("Ошибка получения:", err)
+				continue
+			}
+
 			fmt.Println(value)
 		case "LIST":
-			d.List()
+			data, err := d.List()
+
+			if err != nil {
+				fmt.Println("Ошибка вывода:", err)
+			}
+
+			for key, value := range data {
+				fmt.Println(key + "=" + value)
+			}
 		case "EXIT":
 			return nil
 		default:

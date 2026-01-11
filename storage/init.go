@@ -17,11 +17,12 @@ func Init(filepath string) (*Database, error) {
 	_, err := os.Stat(filepath)
 
 	if errors.Is(err, os.ErrNotExist) {
-		_, err := os.Create(filepath)
+		f, err := os.Create(filepath)
 
 		if err != nil {
 			return nil, fmt.Errorf("Ошибка создания файла: %w", err)
 		}
+		f.Close()
 
 		newDatabase.filepath = filepath
 
