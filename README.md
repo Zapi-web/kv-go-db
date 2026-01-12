@@ -6,9 +6,9 @@ A simple and reliable key-value database written in **Go**. This project was cre
 
 * **Thread-Safety**: Full support for multithreading using `sync.RWMutex`. Safe reading and writing from different goroutines.
 * **Performance**: Data is cached in RAM (Map), which provides instant access via the `GET` command.
-* **Persistence**: All changes are automatically saved to the file. When restarted, the database restores its state.
 * **DevOps-Ready**: Configuration via environment variables (`.env`) and Docker support (planned).
-* **Clean Architecture**: The logic of working with data is completely separated from the interaction interface.
+* **High Coverage**: Robust reliability with **92.5% unit test coverage**.
+* **Tombstone Deletion**: Professional-grade deletion logic. Instead of slow file rewrites, it uses fast append-only "tombstone" markers.
 
 ## 🛠 Commands
 
@@ -17,6 +17,7 @@ A simple and reliable key-value database written in **Go**. This project was cre
 | **SET** | Save the value by key | `SET user_1 ivan` |
 | **GET** | Get value by key | `GET user_1` |
 | **LIST** | Show all entries in the database | `LIST` |
+| **DELETE** | Remove key (Append-only) | `DELETE user_1` |
 | **EXIT** | Finish work | `EXIT` |
 
 ## 📦 How to start
