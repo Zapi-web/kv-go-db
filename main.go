@@ -65,6 +65,18 @@ func CommandEnter(d *storage.Database) error {
 			for key, value := range data {
 				fmt.Println(key + "=" + value)
 			}
+		case "DELETE":
+			if len(sliceCommand) < 2 {
+				fmt.Println("Ошибка, для команды DELETE нужно ввести 2 значения")
+				continue
+			}
+
+			err := d.Delete(sliceCommand[1])
+
+			if err != nil {
+				fmt.Println("Ошибка удаления:", err)
+				continue
+			}
 		case "EXIT":
 			return nil
 		default:

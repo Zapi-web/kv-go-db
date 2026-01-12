@@ -72,3 +72,29 @@ func (d *Database) List() (map[string]string, error) {
 
 	return storageCopy, nil
 }
+
+func (d *Database) Delete(key string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if key == "" {
+		return errors.New("Ошибка: пустой ввод")
+	}
+
+	if _, ok := d.storage[key]; !ok {
+		return errors.New("Ошибка: не найдено")
+	}
+
+	file, err := os.OpenFile(d.filepath, os.O_WRONLY|os.O_APPEND, 0644)
+
+	if err != nil {
+		return errors.New("Ошибка: открытия файла")
+	}
+	defer file.Close()
+
+	delete(d.storage, key)
+
+	file.WriteString(key + "=__TOMBSTONE__" + "\n")
+
+	return nil
+}

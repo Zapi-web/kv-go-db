@@ -46,6 +46,11 @@ func Init(filepath string) (*Database, error) {
 			continue
 		}
 
+		if lineSplited[1] == "__TOMBSTONE__" {
+			delete(newDatabase.storage, lineSplited[0])
+			continue
+		}
+
 		newDatabase.storage[lineSplited[0]] = lineSplited[1]
 	}
 

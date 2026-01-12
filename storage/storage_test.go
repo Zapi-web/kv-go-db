@@ -137,3 +137,55 @@ func TestList(t *testing.T) {
 		})
 	}
 }
+
+func TestDelete(t *testing.T) {
+	tests := []struct {
+		name           string
+		keys           []string
+		values         []string
+		deletedKey     string
+		expectedResult map[string]string
+		expectedError  string
+	}{
+		{"Обычный вывод", []string{"a", "b", "c"}, []string{"1", "2", "3"}, "a", map[string]string{"b": "2", "c": "3"}, ""},
+		{"Пустой ввод", []string{}, []string{}, "", map[string]string{}, "Ошибка: пустой ввод"},
+		{"Пустая бд", []string{}, []string{}, "a", map[string]string{}, "Ошибка: не найдено"},
+		{"Несуществующий ключ", []string{}, []string{}, "a", map[string]string{}, "Ошибка: не найдено"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := makeTempDatabase(t)
+
+			if tt.keys != nil && tt.values != nil {
+				for i, _ := range tt.keys {
+					d.Set(tt.keys[i], tt.values[i])
+				}
+			}
+
+			err := d.Delete(tt.deletedKey)
+
+			if tt.expectedError != "" {
+				if err == nil || err.Error() != tt.expectedError {
+					t.Fatalf("Ожидал ошибку %s, получил %s", tt.expectedError, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Не ожидал ошибку но получил %s", err)
+			}
+
+			newDB, err := Init(d.filepath)
+			if err != nil {
+				t.Fatalf("Не удалось инициализировать базу заново: %s", err)
+			}
+
+			res, _ := newDB.List()
+
+			if !maps.Equal(tt.expectedResult, res) {
+				t.Errorf("Ожидал %v, получил %v", tt.expectedResult, res)
+			}
+		})
+	}
+}
