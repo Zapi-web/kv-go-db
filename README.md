@@ -8,30 +8,38 @@ A simple and reliable key-value database written in **Go**. This project was cre
 * **Performance**: Data is cached in RAM (Map), which provides instant access via the `GET` command.
 * **DevOps-Ready**: Configuration via environment variables (`.env`) and Docker support (planned).
 * **High Coverage**: Robust reliability with **92.5% unit test coverage**.
-* **Tombstone Deletion**: Professional-grade deletion logic. Instead of slow file rewrites, it uses fast append-only "tombstone" markers.
+* **Append-Only & Tombstones**: Optimized for write speed. Deletions use "tombstone" markers to avoid expensive file rewrites, keeping the database fast and reliable.
 
 ## 🛠 Commands
 
 | Command | Description | Example |
 | :--- | :--- | :--- |
-| **SET** | Save the value by key | `SET user_1 ivan` |
-| **GET** | Get value by key | `GET user_1` |
-| **LIST** | Show all entries in the database | `LIST` |
-| **DELETE** | Remove key (Append-only) | `DELETE user_1` |
-| **EXIT** | Finish work | `EXIT` |
+| **set** | Save the value by key | `./db set user_1 ivan` |
+| **get** | Get value by key | `./db get user_1` |
+| **list** | Show all entries in the database | `./db list` |
+| **delete** | Remove key (Append-only) | `./db delete user_1` |
 
 ## 📦 How to start
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/Zapi-web/kv-go-db.git](https://github.com/Zapi-web/kv-go-db.git)
+    git clone https://github.com/Zapi-web/kv-go-db.git
+    cd kv-go-db
+    go build -o db
 
 2. **Configure environment variables:** Create an .env file and specify the path to the database:
     ```Plaintext
     FILEPATH=data.db
-3. **Start the app**
+3. **Usage:** You can now run commands directly from your terminal:
     ```bash
-    go run main.go
+    # Save data
+    ./db set mykey "Hello World"
+
+    # Retrieve data
+    ./db get mykey
+
+    # List all records
+    ./db list
 
 ## 👨‍💻 About me
 
