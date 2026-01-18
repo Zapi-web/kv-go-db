@@ -4,16 +4,25 @@ import (
 	"maps"
 	"path/filepath"
 	"testing"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
 func makeTempDatabase(t *testing.T) *Database {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "data.db")
-	d, err := Init(path)
+	logger := zaptest.NewLogger(t)
+
+	d, err := Init(path, logger)
 
 	if err != nil {
 		t.Fatalf("Не удалось инициализировать базу данных, %s", err)
 	}
+
+	t.Cleanup(func() {
+		d.Close()
+	})
 
 	return d
 }
@@ -176,10 +185,11 @@ func TestDelete(t *testing.T) {
 				t.Fatalf("Не ожидал ошибку но получил %s", err)
 			}
 
-			newDB, err := Init(d.filepath)
+			newDB, err := Init(d.filepath, zap.NewNop())
 			if err != nil {
 				t.Fatalf("Не удалось инициализировать базу заново: %s", err)
 			}
+			defer newDB.Close()
 
 			res, _ := newDB.List()
 

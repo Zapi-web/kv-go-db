@@ -6,48 +6,60 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
+
+	"go.uber.org/zap"
 )
 
-func Init(filepath string) (*Database, error) {
+func Init(filepath string, l *zap.Logger) (*Database, error) {
+	start := time.Now()
+
 	var newDatabase Database = Database{
 		storage:  make(map[string]string),
 		filepath: filepath,
+		logger:   l,
 	}
 
 	_, err := os.Stat(filepath)
 
 	if errors.Is(err, os.ErrNotExist) {
-		f, err := os.Create(filepath)
+		newDatabase.file, err = os.Create(filepath)
 
 		if err != nil {
 			return nil, fmt.Errorf("Ошибка создания файла: %w", err)
 		}
-		f.Close()
 
 		newDatabase.filepath = filepath
 
 		return &newDatabase, nil
 	}
 
-	file, err := os.OpenFile(filepath, os.O_RDONLY, 0666)
+	newDatabase.file, err = os.OpenFile(filepath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 
 	if err != nil {
 		return &newDatabase, fmt.Errorf("Ошибка открытия файла: %w", err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	var totalLines, tombstones int
+
+	scanner := bufio.NewScanner(newDatabase.file)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		lineSplited := strings.SplitN(line, "=", 2)
 
+		totalLines++
 		if len(lineSplited) < 2 {
+			newDatabase.logger.Warn("corrupted line",
+				zap.String("line", line),
+				zap.Int("line_number", totalLines),
+			)
 			continue
 		}
 
 		if lineSplited[1] == "__TOMBSTONE__" {
 			delete(newDatabase.storage, lineSplited[0])
+			tombstones++
 			continue
 		}
 
@@ -55,6 +67,14 @@ func Init(filepath string) (*Database, error) {
 	}
 
 	newDatabase.filepath = filepath
+	duration := time.Since(start)
+
+	newDatabase.logger.Info("start info",
+		zap.Int("total lines", totalLines),
+		zap.Int("active keys", len(newDatabase.storage)),
+		zap.Int("tombstones", tombstones),
+		zap.Duration("duration", duration),
+	)
 
 	return &newDatabase, nil
 }

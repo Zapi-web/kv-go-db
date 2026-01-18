@@ -5,15 +5,22 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
+
+	"go.uber.org/zap"
 )
 
 type Database struct {
 	storage  map[string]string
 	mu       sync.RWMutex
+	file     *os.File
 	filepath string
+	logger   *zap.Logger
 }
 
 func (d *Database) Set(key string, value string) error {
+	start := time.Now()
+
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -25,17 +32,22 @@ func (d *Database) Set(key string, value string) error {
 		return errors.New("Такой ключ уже существует")
 	}
 
-	file, err := os.OpenFile(d.filepath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	_, err := d.file.WriteString(key + "=" + value + "\n")
 
 	if err != nil {
-		return fmt.Errorf("не удалось открыть или создать файл: %w", err)
+		return fmt.Errorf("Ошибка записи в файл %w", err)
 	}
 
-	defer file.Close()
+	err = d.file.Sync()
 
-	file.WriteString(key + "=" + value + "\n")
+	if err != nil {
+		return fmt.Errorf("Ошибка синхронизации диска %w", err)
+	}
+
 	d.storage[key] = value
-
+	d.logger.Debug("Запись добавлена", zap.String("key", key),
+		zap.Duration("Duration", time.Since(start)),
+	)
 	return nil
 }
 
@@ -74,6 +86,8 @@ func (d *Database) List() (map[string]string, error) {
 }
 
 func (d *Database) Delete(key string) error {
+	start := time.Now()
+
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -85,16 +99,32 @@ func (d *Database) Delete(key string) error {
 		return errors.New("Ошибка: не найдено")
 	}
 
-	file, err := os.OpenFile(d.filepath, os.O_WRONLY|os.O_APPEND, 0644)
-
-	if err != nil {
-		return errors.New("Ошибка: открытия файла")
-	}
-	defer file.Close()
-
 	delete(d.storage, key)
 
-	file.WriteString(key + "=__TOMBSTONE__" + "\n")
+	_, err := d.file.WriteString(key + "=__TOMBSTONE__" + "\n")
 
+	if err != nil {
+		return fmt.Errorf("Ошибка записи TOMBSTONE метки %w", err)
+	}
+
+	err = d.file.Sync()
+
+	if err != nil {
+		return fmt.Errorf("Ошибка синхронизации диска %w", err)
+	}
+
+	d.logger.Debug("Запись удалена",
+		zap.String("key", key),
+		zap.Duration("duration", time.Since(start)),
+	)
+
+	return nil
+}
+
+func (d *Database) Close() error {
+	d.logger.Info("database connection closed", zap.String("path", d.filepath))
+	if d.file != nil {
+		return d.file.Close()
+	}
 	return nil
 }

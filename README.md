@@ -5,10 +5,15 @@ A simple and reliable key-value database written in **Go**. This project was cre
 ## 🚀 Features
 
 * **Thread-Safety**: Full support for multithreading using `sync.RWMutex`. Safe reading and writing from different goroutines.
-* **Performance**: Data is cached in RAM (Map), which provides instant access via the `GET` command.
+* **Optimized I/O**: High performance achieved by maintaining an open file descriptor.
 * **DevOps-Ready**: Configuration via environment variables (`.env`) and Docker support (planned).
-* **High Coverage**: Robust reliability with **92.5% unit test coverage**.
-* **Append-Only & Tombstones**: Optimized for write speed. Deletions use "tombstone" markers to avoid expensive file rewrites, keeping the database fast and reliable.
+* **High Coverage**: Robust reliability with **89% unit test coverage**.
+* **Observability**: Structured JSON logging with `zap` and latency monitoring.
+
+## 📈 Performance (Benchmark Results)
+The engine provides a clear trade-off between reliability and speed (Tested on AMD Ryzen 5 5600.):
+- **Durable writes**: 1.5k ops/sec.
+- **Async writes**: 300k+ ops/sec.
 
 ## 🛠 Commands
 
