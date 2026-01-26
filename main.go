@@ -1,6 +1,6 @@
 package main
 
-import "db/cmd"
+import "github.com/Zapi-web/kv-go-db/cmd"
 
 func main() {
 	cmd.Execute()

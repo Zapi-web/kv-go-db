@@ -14,7 +14,7 @@ import (
 func Init(filepath string, l *zap.Logger) (*Database, error) {
 	start := time.Now()
 
-	var newDatabase Database = Database{
+	newDatabase := Database{
 		storage:  make(map[string]string),
 		filepath: filepath,
 		logger:   l,
@@ -26,7 +26,7 @@ func Init(filepath string, l *zap.Logger) (*Database, error) {
 		newDatabase.file, err = os.Create(filepath)
 
 		if err != nil {
-			return nil, fmt.Errorf("Ошибка создания файла: %w", err)
+			return nil, fmt.Errorf("ошибка создания файла: %w", err)
 		}
 
 		newDatabase.filepath = filepath
@@ -37,7 +37,7 @@ func Init(filepath string, l *zap.Logger) (*Database, error) {
 	newDatabase.file, err = os.OpenFile(filepath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 
 	if err != nil {
-		return &newDatabase, fmt.Errorf("Ошибка открытия файла: %w", err)
+		return &newDatabase, fmt.Errorf("ошибка открытия файла: %w", err)
 	}
 
 	var totalLines, tombstones int

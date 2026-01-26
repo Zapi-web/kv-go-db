@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"db/internal/logger"
-	"db/storage"
 	"fmt"
 	"os"
 
+	"github.com/Zapi-web/kv-go-db/internal/logger"
+	"github.com/Zapi-web/kv-go-db/storage"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -47,7 +47,11 @@ func Execute() {
 		if d != nil {
 			d.Close()
 		}
-		logger.Log.Sync()
+		err := logger.Log.Sync()
+
+		if err != nil {
+			fmt.Printf("Ошибка синхронизации логера %v", err)
+		}
 	}()
 
 	err := rootCmd.Execute()

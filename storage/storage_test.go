@@ -122,8 +122,8 @@ func TestList(t *testing.T) {
 			d := makeTempDatabase(t)
 
 			if tt.keys != nil && tt.values != nil {
-				for i, _ := range tt.keys {
-					d.Set(tt.keys[i], tt.values[i])
+				for i, v := range tt.keys {
+					d.Set(v, tt.values[i])
 				}
 			}
 
@@ -167,8 +167,8 @@ func TestDelete(t *testing.T) {
 			d := makeTempDatabase(t)
 
 			if tt.keys != nil && tt.values != nil {
-				for i, _ := range tt.keys {
-					d.Set(tt.keys[i], tt.values[i])
+				for i, v := range tt.keys {
+					d.Set(v, tt.values[i])
 				}
 			}
 

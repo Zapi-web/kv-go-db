@@ -25,23 +25,23 @@ func (d *Database) Set(key string, value string) error {
 	defer d.mu.Unlock()
 
 	if key == "" || value == "" {
-		return errors.New("Ошибка: пустой ввод")
+		return errors.New("ошибка: пустой ввод")
 	}
 
 	if _, ok := d.storage[key]; ok {
-		return errors.New("Такой ключ уже существует")
+		return errors.New("такой ключ уже существует")
 	}
 
 	_, err := d.file.WriteString(key + "=" + value + "\n")
 
 	if err != nil {
-		return fmt.Errorf("Ошибка записи в файл %w", err)
+		return fmt.Errorf("ошибка записи в файл %w", err)
 	}
 
 	err = d.file.Sync()
 
 	if err != nil {
-		return fmt.Errorf("Ошибка синхронизации диска %w", err)
+		return fmt.Errorf("ошибка синхронизации диска %w", err)
 	}
 
 	d.storage[key] = value
@@ -56,13 +56,13 @@ func (d *Database) Get(key string) (string, error) {
 	defer d.mu.RUnlock()
 
 	if key == "" {
-		return "", errors.New("Ошибка: пустой ввод")
+		return "", errors.New("ошибка: пустой ввод")
 	}
 
 	value, ok := d.storage[key]
 
 	if !ok {
-		return "", errors.New("Ошибка: не найдено")
+		return "", errors.New("ошибка: не найдено")
 	}
 
 	return value, nil
@@ -73,7 +73,7 @@ func (d *Database) List() (map[string]string, error) {
 	defer d.mu.RUnlock()
 
 	if len(d.storage) == 0 {
-		return nil, errors.New("Ошибка: база данных пуста")
+		return nil, errors.New("ошибка: база данных пуста")
 	}
 
 	var storageCopy = make(map[string]string)
@@ -92,11 +92,11 @@ func (d *Database) Delete(key string) error {
 	defer d.mu.Unlock()
 
 	if key == "" {
-		return errors.New("Ошибка: пустой ввод")
+		return errors.New("ошибка: пустой ввод")
 	}
 
 	if _, ok := d.storage[key]; !ok {
-		return errors.New("Ошибка: не найдено")
+		return errors.New("ошибка: не найдено")
 	}
 
 	delete(d.storage, key)
@@ -104,13 +104,13 @@ func (d *Database) Delete(key string) error {
 	_, err := d.file.WriteString(key + "=__TOMBSTONE__" + "\n")
 
 	if err != nil {
-		return fmt.Errorf("Ошибка записи TOMBSTONE метки %w", err)
+		return fmt.Errorf("ошибка записи TOMBSTONE метки %w", err)
 	}
 
 	err = d.file.Sync()
 
 	if err != nil {
-		return fmt.Errorf("Ошибка синхронизации диска %w", err)
+		return fmt.Errorf("ошибка синхронизации диска %w", err)
 	}
 
 	d.logger.Debug("Запись удалена",
